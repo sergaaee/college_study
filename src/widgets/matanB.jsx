@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { derivative } from 'mathjs'
+import { taylorCoefs } from '../lib/jet.js'
 import { Plot, Curve, Dots, HLine, VLine, Band, Pt, Seg, Rect, Label, Param, Area, Poly } from '../lib/plot.jsx'
 import { Slider, Toggle, Segmented, Stat } from '../lib/ui.jsx'
 import { useVals } from '../lib/usep.jsx'
@@ -10,30 +10,14 @@ import { Split, Verdict, Readout, f4, tn } from './common.jsx'
 const TAYLOR = {
   'sin x': 'sin(x)', 'cos x': 'cos(x)', 'eˣ': 'exp(x)', 'ln(1+x)': 'log(1+x)', '1/(1−x)': '1/(1-x)', '√(1+x)': 'sqrt(1+x)', 'arctg x': 'atan(x)',
 }
-const derivCache = new Map()
-function derivs(expr, nmax) {
-  const key = expr + '|' + nmax
-  if (derivCache.has(key)) return derivCache.get(key)
-  const out = [fn(expr, 'x')]
-  let node = expr
-  for (let k = 1; k <= nmax; k++) {
-    try { node = derivative(node, 'x').toString() } catch { break }
-    out.push(fn(node, 'x'))
-  }
-  derivCache.set(key, out)
-  return out
-}
 export function Taylor({ preset, presets, a: a0 = 0, n: n0 = 3, xr = [-5, 5], yr = [-4, 4], x0 = 1.5, fixedA = false }) {
   const PRE = presets || TAYLOR
   const [key, setKey] = useState(preset && PRE[preset] ? preset : Object.keys(PRE)[0])
   const [n, setN] = useState(n0)
   const [a, setA] = useState(a0)
   const [x, setX] = useState(x0)
-  const ds = useMemo(() => derivs(PRE[key], 12), [key])
-  const f = ds[0]
-  const coefs = []
-  let fact = 1
-  for (let k = 0; k <= n; k++) { if (k > 0) fact *= k; coefs.push((ds[k] ? ds[k](a) : NaN) / fact) }
+  const f = useMemo(() => fn(PRE[key], 'x'), [key])
+  const coefs = taylorCoefs(PRE[key], a, 12).slice(0, n + 1)
   const P = t => coefs.reduce((s, c, k) => s + c * Math.pow(t - a, k), 0)
   const err = Math.abs(f(x) - P(x))
   return (
