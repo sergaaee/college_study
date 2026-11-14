@@ -1,0 +1,24 @@
+{
+  "name": "college-study",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Личный сайт для обучения по трём конспектам: матанализ, линейная алгебра, дискретная математика",
+  "scripts": {
+    "dev": "vite --open",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "node scripts/check-content.mjs"
+  },
+  "dependencies": {
+    "katex": "^0.19.1",
+    "mathjs": "^15.2.0",
+    "pdfjs-dist": "^6.5.438",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.3.0",
+    "vite": "^8.3.8"
+  }
+}
